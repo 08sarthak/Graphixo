@@ -1,0 +1,152 @@
+from flask import Flask, render_template, request
+import pandas as pd
+import matplotlib.pyplot as plt
+import io
+import base64
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('upload.html')
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return "No file part"
+
+    file = request.files['file']
+    if file.filename == '':
+        return "No selected file"
+
+    if file:
+        data = pd.read_excel(file)
+
+
+        plt.bar(data['Category'], data['Value'])
+        plt.xlabel('Category')
+        plt.ylabel('Value')
+        plt.title('Bar Chart')
+        bar_chart_image = get_image()
+
+
+        plt.figure()
+        plt.pie(data['Value'], labels=data['Category'], autopct='%1.1f%%')
+        plt.title('Pie Chart')
+        pie_chart_image = get_image()
+
+        return render_template('result.html', bar_chart=bar_chart_image, pie_chart=pie_chart_image)
+
+def get_image():
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    return base64.b64encode(img.getvalue()).decode()
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+**HTML**
+
+result
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result</title>
+</head>
+<body>
+    <h1>Generated Charts</h1>
+    <h2>Bar Chart</h2>
+    <img src="data:image/png;base64,{{ bar_chart }}" alt="Bar Chart">
+    <h2>Pie Chart</h2>
+    <img src="data:image/png;base64,{{ pie_chart }}" alt="Pie Chart">
+</body>
+</html>
+
+upload
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Excel File</title>
+</head>
+<body>
+    <h1>Upload an Excel File</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload and Generate Charts">
+    </form>
+</body>
+</html>
+
+
+  {% comment %} 
+  <div><p>
+    <img class="padded" src="logo.png" width="600" height="305">
+    <label for="images" class="drop-container" id="dropcontainer">
+      <span class="drop-title">Drop files here</span>
+      or
+      <input type="file" id="images" accept=".xls/.xlsx,.pdf,.png" required>
+    </label></p>
+  </div>
+   {% endcomment %}
+
+
+
+   **Code**
+
+from flask import Flask, render_template, request
+import pandas as pd
+import matplotlib.pyplot as plt
+import io
+import base64
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('upload.html')
+
+@app.route('/prj2pg')
+def display():
+    return render_template('prj2pg.html')
+
+@app.route('/result', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return "No file part"
+
+    file = request.files['file']
+    if file.filename == '':
+        return "No selected file"
+
+    if file:
+        data = pd.read_excel(file)
+
+
+        plt.bar(data['Category'], data['Value'])
+        plt.xlabel('Category')
+        plt.ylabel('Value')
+        plt.title('Bar Chart')
+        bar_chart_image = get_image()
+
+
+        plt.figure()
+        plt.pie(data['Value'], labels=data['Category'], autopct='%1.1f%%')
+        plt.title('Pie Chart')
+        pie_chart_image = get_image()
+
+        return render_template('prj2pg.html', bar_chart=bar_chart_image, pie_chart=pie_chart_image)
+
+def get_image():
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    return base64.b64encode(img.getvalue()).decode()
+
+if __name__ == '__main__':
+    app.run(debug=True)
